@@ -1,0 +1,29 @@
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.wrapper {
+  width: 550px;
+  margin: 20px auto;
+}
+
+.in-group {
+  width: 0;
+}
+
+.text-muted {
+  margin-bottom: 0;
+}
+
+.close {
+  display: none;
+}
+
+.out-item:hover .close {
+  display: block;
+}
+
+.out-item-stroke {
+  text-decoration: line-through;
+  color: gray;
+}
