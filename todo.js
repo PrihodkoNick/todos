@@ -1,197 +1,217 @@
 // ???-1 что-то не нравится мне тут
+// checkAll[0].prop("checked", "checked");
 
 $(document).ready(function() {
-  const divCheckAll = $(".in-group"),
-    rbCheckAll = $(".in-check-all"),
-    inTodo = $(".in-todo"),
-    outList = $(".out-list"),
-    outFooter = $(".out-footer"),
-    outItemsLeft = $(".out-left"),
-    outClearComplete = $(".out-clear"),
-    outFilters = $(".out-filters");
+  const $checkAll = $(".check-all");
+  const $todoText = $(".todo-text");
+  const $todoList = $(".todo-list");
+  const $footer = $(".footer");
+  const $itemsLeft = $(".items-left");
+  const $clearComplete = $(".clear-complete");
+  const $filterAll = $("#all");
+  const $filterActive = $("#active");
+  const $filterComplete = $("#complete");
 
-  let arrTodo = [];
+  let todos = [];
   let counter = 0;
 
   function addCase(e) {
     if (e.keyCode === 13) {
       try {
-        if (inTodo.val() === "") {
+        if ($todoText.val() === "") {
           throw new SyntaxError(
             "Данные неполны: введите значение в поле ввода"
           );
         }
 
-        buildTodo();
-        renderHeader();
-        renderBody();
-        renderFooter();
-        inTodo.val("");
+        addTodo();
+        render();
+        $todoText.val("");
       } catch (err) {
-        // обрабатываем красным подсвечиваем input
-        alert(err.type + " " + err.message);
+        setTimeout(() => {
+          setTimeout(() => {
+            $todoText.removeClass("border border-danger");
+          }, 500);
+          $todoText.addClass("border border-danger");
+        }, 0);
+        // add hint or change placeholder
       }
     }
   }
 
-  function buildTodo() {
-    let temp = {};
-    temp.done = false;
-    temp.value = inTodo.val();
-    temp.id = counter;
-    arrTodo.push(temp);
+  // add new todo
+  function addTodo() {
+    todos.push({ done: false, value: $todoText.val(), id: counter });
     counter++;
   }
 
   function renderHeader() {
-    // show radio button "Check All"
-    if (arrTodo.length > 0) {
-      let arrLeft = arrTodo.filter(item => item.done == false);
-      arrLeft.length > 0
-        ? rbCheckAll.prop("checked", "")
-        : rbCheckAll.prop("checked", "checked");
-      divCheckAll.css("width", "39");
+    if (todos.length) {
+      let arrLeft = todos.filter(item => item.done === false);
+      arrLeft.length
+        ? ($checkAll[0].checked = false)
+        : ($checkAll[0].checked = true);
+      $checkAll.closest(".input-group-prepend").removeClass("invisible");
     } else {
-      divCheckAll.css("width", "0");
-      rbCheckAll.prop("checked", "");
+      $checkAll.closest(".input-group-prepend").addClass("invisible");
+      $checkAll[0].checked = false;
     }
   }
 
-  function renderBody() {
-    let checked;
-    let stroke;
+  function render() {
+    renderHeader();
 
-    outList.empty();
-    arrTodo.forEach((item, index) => {
-      item.done ? (checked = "checked") : (checked = "");
-      item.done ? (stroke = "out-item-stroke") : (stroke = "");
-      outList.append(`<div class="out-item input-group" id="out-item-${item.id}">
+    let checked;
+    let strike;
+
+    $todoList.empty();
+    todos.forEach((item, index) => {
+      checked = item.done ? "checked" : "";
+      strike = item.done ? "strike" : "";
+
+      $todoList.append(`<div class="todo-item input-group" data-tid="${item.id}">
         <div class="input-group-prepend">
           <div class="input-group-text">
             <input
-              class="out-check"
-              id="out-check-${item.id}"
+              class="todo-check"              
               type="checkbox"
               aria-label="Checkbox for following text input"
               ${checked}
             />
           </div>
         </div>
-        <li class="list-group-item flex-grow-1 ${stroke}">
+        <li class="todo-list-item list-group-item flex-grow-1 ${strike}">
           ${item.value}
+          <input type="text" class="todo-edit invisible">
           <button
-            id="close-${item.id}"
             type="button"
             class="close text-danger"
             aria-label="Close"
           >
-            <span id="span-${item.id}" aria-hidden="true">&times;</span>
+            <span class="btn-delete-todo" aria-hidden="true">&times;</span>
           </button>
         </li>
       </div>`);
     });
+
+    renderFooter();
   }
 
   function renderFooter() {
-    let arrLeft = arrTodo.filter(item => item.done == false);
-    let arrDone = arrTodo.filter(item => item.done == true);
+    let arrLeftLength = todos.filter(item => item.done == false).length;
+    let arrDoneLength = todos.length - arrLeftLength;
 
     // show footer
-    arrTodo.length > 0
-      ? outFooter.removeClass("invisible")
-      : outFooter.addClass("invisible");
+    todos.length
+      ? $footer.removeClass("invisible")
+      : $footer.addClass("invisible");
 
     // build "items left"
-    outItemsLeft.text(`${arrLeft.length} items left`);
+    $itemsLeft.text(`${arrLeftLength} items left`);
 
     // show "Clear complete"
-    arrDone.length > 0
-      ? outClearComplete.removeClass("invisible")
-      : outClearComplete.addClass("invisible");
+    arrDoneLength
+      ? $clearComplete.removeClass("invisible")
+      : $clearComplete.addClass("invisible");
   }
 
-  function findIndexById(id) {
-    let indexById = -1;
+  // check one todo
+  function checkTodo(id) {
+    let index = todos.findIndex(curr => curr.id === id);
+    todos[index].done = !todos[index].done;
 
-    // search index by id ???-1
-    arrTodo.forEach((item, index) => {
-      item.id == id ? (indexById = index) : -1;
-    });
-
-    return indexById;
+    render();
   }
 
-  function checkCase(e) {
-    if (e.target.classList.contains("in-check-all")) {
-      // check all cases
-      rbCheckAll.prop("checked")
-        ? arrTodo.forEach(item => (item.done = true))
-        : arrTodo.forEach(item => (item.done = false));
-    } else {
-      // check one case
-      let index = findIndexById(e.target.id.slice("out-check-".length)); // search index by Id
-
-      arrTodo[index].done = $(`#${e.target.id}`).prop("checked");
+  // check all todos
+  function checkAllTodo() {
+    for (key of todos) {
+      key.done = $checkAll[0].checked;
     }
 
-    renderHeader();
-    renderBody();
-    renderFooter();
+    render();
   }
 
-  function deleteCase(e) {
-    if (e.target.classList.contains("out-clear")) {
-      // delete all checked cases
-      let arrLeft = arrTodo.filter(item => item.done == false);
-      arrTodo = arrLeft;
-    } else {
-      // delete one case
+  // delete one case
+  function deleteTodo(id) {
+    let index = todos.findIndex(curr => curr.id === id);
+    todos.splice(index, 1);
 
-      let index = findIndexById(e.target.id.slice("span-".length)); // search index by Id
-      arrTodo.splice(index, 1);
-    }
-
-    renderHeader();
-    renderBody();
-    renderFooter();
+    render();
   }
 
-  function filterCases(e) {
-    let arrFilter = [];
+  // clear complete
+  function clearAllTodo() {
+    todos = todos.filter(item => item.done == false);
 
-    if (e.target.id === "option1") {
-    }
-    if (e.target.id === "option2") {
-      arrFilter = arrTodo.filter(item => item.done == false);
-    }
-    if (e.target.id === "option3") {
-      arrFilter = arrTodo.filter(item => item.done == true);
-    }
+    render();
+  }
 
-    console.log(arrFilter);
+  // edit todo
+  function editTodo(e, id) {
+    let elem = e.target.firstElementChild;
+    elem.classList.remove("invisible");
+    elem.value = todos.filter(item => item.id === id)[0].value;
+  }
+
+  // filter all
+  function filterAll() {
+    setFilterActive($filterAll);
+  }
+
+  function setFilterActive(elem) {
+    elem
+      .closest(".filters")
+      .children(".btn")
+      .removeClass("active");
+    elem.closest(".btn").addClass("active");
+  }
+
+  // filter active
+  function filterActive() {
+    setFilterActive($filterActive);
+  }
+
+  // filter complete
+  function filterComplete() {
+    setFilterActive($filterComplete);
   }
 
   // "Enter" на поле ввода
-  inTodo.keydown(addCase);
+  $todoText.keydown(addCase);
 
   // click "Check all"
-  rbCheckAll.click(checkCase);
+  $checkAll.click(checkAllTodo);
 
   // click "Clear complete"
-  outClearComplete.click(deleteCase);
+  $clearComplete.click(clearAllTodo);
 
   // click filter
-  outFilters.click(filterCases);
+  $filterAll.click(filterAll);
+  $filterActive.click(filterActive);
+  $filterComplete.click(filterComplete);
 
   // click list
-  outList.click(e => {
-    // click check case
-    if (e.target.id.startsWith("out-check-")) {
-      checkCase(e);
+  $todoList.click(e => {
+    let id = +e.target.closest(".todo-item").dataset.tid;
+
+    // click check todo
+    if (e.target.classList.contains("todo-check")) {
+      checkTodo(id);
     }
-    // click delete case
-    if (e.target.id.startsWith("span-")) {
-      deleteCase(e);
+
+    // click delete todo
+    if (e.target.classList.contains("btn-delete-todo")) {
+      deleteTodo(id);
+    }
+  });
+
+  // dbl click "edit" todo
+  $todoList.dblclick(e => {
+    let id = +e.target.closest(".todo-item").dataset.tid;
+
+    if (e.target.classList.contains("todo-list-item")) {
+      editTodo(e, id);
     }
   });
 });
