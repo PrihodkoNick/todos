@@ -15,7 +15,7 @@
   <body>
     <div class="wrapper">
       <h1 class="display-1 text-center text-info">Todos</h1>
-      <div class="input-group mb-3">
+      <div class="input-group mb-2">
         <div class="input-group-prepend invisible">
           <div class="input-group-text">
             <input class="check-all" type="checkbox" />
@@ -29,9 +29,25 @@
           aria-describedby="button-addon2"
           maxlength="50"
         />
+        <button type="button" class="tuning"></button>
+      </div>
+
+      <div class="tuning-panel mb-2">
+        <div class="tuning-box">
+          <label class="tuning-label"
+            ><span>Search:</span><input type="text"
+          /></label>
+          <label class="tuning-label tuning-page"
+            ><span>Todos on page:</span>
+            <input type="number" min="3" max="99" value="3" />
+          </label>
+        </div>
       </div>
 
       <ul class="todo-list list-group mb-2"></ul>
+      <nav class="d-flex justify-content-center">
+        <ul class="pagination"></ul>
+      </nav>
 
       <div
         class="footer d-flex justify-content-between align-items-center border rounded p-1 bg-light invisible"
@@ -60,11 +76,8 @@
       </div>
     </div>
 
-    <script
-      src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-      integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
-      crossorigin="anonymous"
-    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
     <script src="todo.js"></script>
   </body>
 </html>
