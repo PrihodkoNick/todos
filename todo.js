@@ -1,197 +1,317 @@
 // ???-1 что-то не нравится мне тут
+// checkAll[0].prop("checked", "checked");
 
-$(document).ready(function() {
-  const divCheckAll = $(".in-group"),
-    rbCheckAll = $(".in-check-all"),
-    inTodo = $(".in-todo"),
-    outList = $(".out-list"),
-    outFooter = $(".out-footer"),
-    outItemsLeft = $(".out-left"),
-    outClearComplete = $(".out-clear"),
-    outFilters = $(".out-filters");
+$(document).ready(function () {
+  const $checkAll = $(".check-all");
+  const $todoText = $(".todo-text");
+  const $todoList = $(".todo-list");
+  const $footer = $(".footer");
+  const $itemsLeft = $(".items-left");
+  const $clearComplete = $(".clear-complete");
+  const $filterAll = $("#all");
+  const $filterActive = $("#active");
+  const $filterComplete = $("#complete");
+  const $tuningPanel = $(".tuning-panel");
+  const $tuning = $(".tuning");
+  const $tuningPage = $(".tuning-page input");
+  const $pagination = $(".pagination");
 
-  let arrTodo = [];
+  let todos = [];
   let counter = 0;
 
-  function addCase(e) {
+  function addTodo(e) {
     if (e.keyCode === 13) {
       try {
-        if (inTodo.val() === "") {
+        if ($todoText.val() === "") {
           throw new SyntaxError(
             "Данные неполны: введите значение в поле ввода"
           );
         }
 
-        buildTodo();
-        renderHeader();
-        renderBody();
-        renderFooter();
-        inTodo.val("");
+        pushTodos();
+        render(true);
+        $todoText.val("");
       } catch (err) {
-        // обрабатываем красным подсвечиваем input
-        alert(err.type + " " + err.message);
+        setTimeout(() => {
+          setTimeout(() => {
+            $todoText.removeClass("border border-danger");
+          }, 500);
+          $todoText.addClass("border border-danger");
+        }, 0);
+        // add hint or change placeholder
       }
     }
   }
 
-  function buildTodo() {
-    let temp = {};
-    temp.done = false;
-    temp.value = inTodo.val();
-    temp.id = counter;
-    arrTodo.push(temp);
+  // add new todo
+  function pushTodos() {
+    todos.push({ done: false, value: $todoText.val(), id: counter });
     counter++;
   }
 
   function renderHeader() {
-    // show radio button "Check All"
-    if (arrTodo.length > 0) {
-      let arrLeft = arrTodo.filter(item => item.done == false);
-      arrLeft.length > 0
-        ? rbCheckAll.prop("checked", "")
-        : rbCheckAll.prop("checked", "checked");
-      divCheckAll.css("width", "39");
+    if (todos.length) {
+      let arrLeft = todos.filter((item) => item.done === false);
+      arrLeft.length
+        ? ($checkAll[0].checked = false)
+        : ($checkAll[0].checked = true);
+      $checkAll.closest(".input-group-prepend").removeClass("invisible");
     } else {
-      divCheckAll.css("width", "0");
-      rbCheckAll.prop("checked", "");
+      $checkAll.closest(".input-group-prepend").addClass("invisible");
+      $checkAll[0].checked = false;
     }
   }
 
-  function renderBody() {
-    let checked;
-    let stroke;
+  function getPageTodos() {
+    let numberPage = $pagination.children(".page-item.active").data("pageId"); // find number of active page
+    let start = +$tuningPage.val() * (numberPage - 1);
+    let end = start + +$tuningPage.val();
+    return todos.slice(start, end);
+  }
 
-    outList.empty();
-    arrTodo.forEach((item, index) => {
-      item.done ? (checked = "checked") : (checked = "");
-      item.done ? (stroke = "out-item-stroke") : (stroke = "");
-      outList.append(`<div class="out-item input-group" id="out-item-${item.id}">
+  function render(add = false) {
+    let todosFilter = todos;
+
+    renderPagination(add);
+
+    // filter array
+    if (todos.length > $tuningPage.val()) {
+      todosFilter = getPageTodos();
+    }
+
+    if (todosFilter.length === 0) {
+      $pagination.children(".page-item").removeClass("active");
+      $pagination.children(".page-item:last-child").addClass("active");
+      todosFilter = getPageTodos();
+    }
+
+    todosFilter = filterTodo(todosFilter);
+
+    renderHeader();
+
+    let checked;
+    let strike;
+
+    $todoList.empty();
+    todosFilter.forEach((item, index) => {
+      checked = item.done ? "checked" : "";
+      strike = item.done ? "strike" : "";
+
+      $todoList.append(`<div class="todo-item input-group" data-tid="${item.id}">
         <div class="input-group-prepend">
           <div class="input-group-text">
-            <input
-              class="out-check"
-              id="out-check-${item.id}"
-              type="checkbox"
-              aria-label="Checkbox for following text input"
-              ${checked}
-            />
+            <input type="checkbox" class="todo-check" ${checked}/>
           </div>
         </div>
-        <li class="list-group-item flex-grow-1 ${stroke}">
+        <li class="todo-list-item list-group-item flex-grow-1 ${strike}">
           ${item.value}
+          <input type="text" class="todo-edit invisible">
           <button
-            id="close-${item.id}"
             type="button"
             class="close text-danger"
-            aria-label="Close"
           >
-            <span id="span-${item.id}" aria-hidden="true">&times;</span>
+            <span class="btn-delete-todo">&times;</span>
           </button>
         </li>
       </div>`);
     });
+
+    renderFooter();
+  }
+
+  function filterTodo(todosFilter) {
+    return $filterAll.closest(".btn").hasClass("active")
+      ? todosFilter
+      : todosFilter.filter(
+          (item) =>
+            item.done === $filterComplete.closest(".btn").hasClass("active")
+        );
   }
 
   function renderFooter() {
-    let arrLeft = arrTodo.filter(item => item.done == false);
-    let arrDone = arrTodo.filter(item => item.done == true);
+    let arrLeftLength = todos.filter((item) => item.done == false).length;
+    let arrDoneLength = todos.length - arrLeftLength;
 
     // show footer
-    arrTodo.length > 0
-      ? outFooter.removeClass("invisible")
-      : outFooter.addClass("invisible");
+    todos.length
+      ? $footer.removeClass("invisible")
+      : $footer.addClass("invisible");
 
     // build "items left"
-    outItemsLeft.text(`${arrLeft.length} items left`);
+    $itemsLeft.text(`${arrLeftLength} items left`);
 
     // show "Clear complete"
-    arrDone.length > 0
-      ? outClearComplete.removeClass("invisible")
-      : outClearComplete.addClass("invisible");
+    arrDoneLength
+      ? $clearComplete.removeClass("invisible")
+      : $clearComplete.addClass("invisible");
   }
 
-  function findIndexById(id) {
-    let indexById = -1;
+  function renderPagination(add) {
+    let numberPage = $pagination.children(".page-item.active").data("pageId");
 
-    // search index by id ???-1
-    arrTodo.forEach((item, index) => {
-      item.id == id ? (indexById = index) : -1;
-    });
-
-    return indexById;
+    $pagination.empty();
+    if (todos.length > $tuningPage.val()) {
+      let count = Math.ceil(todos.length / $tuningPage.val());
+      for (let i = 0; i < count; i++) {
+        $pagination.append(`<li class="page-item ${
+          i === numberPage - 1 ? "active" : ""
+        }" data-page-id="${i + 1}">
+        <a class="page-link" href="#">${i + 1}</a>
+      </li>`);
+      }
+    }
+    if (add) {
+      $pagination.children(".page-item").removeClass("active");
+      $pagination.children(".page-item:last-child").addClass("active");
+    }
   }
 
-  function checkCase(e) {
-    if (e.target.classList.contains("in-check-all")) {
-      // check all cases
-      rbCheckAll.prop("checked")
-        ? arrTodo.forEach(item => (item.done = true))
-        : arrTodo.forEach(item => (item.done = false));
-    } else {
-      // check one case
-      let index = findIndexById(e.target.id.slice("out-check-".length)); // search index by Id
+  // check one todo
+  function checkTodo(id) {
+    let index = todos.findIndex((curr) => curr.id === id);
+    todos[index].done = !todos[index].done;
 
-      arrTodo[index].done = $(`#${e.target.id}`).prop("checked");
-    }
-
-    renderHeader();
-    renderBody();
-    renderFooter();
+    render();
   }
 
-  function deleteCase(e) {
-    if (e.target.classList.contains("out-clear")) {
-      // delete all checked cases
-      let arrLeft = arrTodo.filter(item => item.done == false);
-      arrTodo = arrLeft;
-    } else {
-      // delete one case
-
-      let index = findIndexById(e.target.id.slice("span-".length)); // search index by Id
-      arrTodo.splice(index, 1);
+  // check all todos
+  function checkAllTodo() {
+    for (key of todos) {
+      key.done = $checkAll[0].checked;
     }
 
-    renderHeader();
-    renderBody();
-    renderFooter();
+    render();
   }
 
-  function filterCases(e) {
-    let arrFilter = [];
+  // delete one case
+  function deleteTodo(id) {
+    let index = todos.findIndex((curr) => curr.id === id);
+    todos.splice(index, 1);
 
-    if (e.target.id === "option1") {
-    }
-    if (e.target.id === "option2") {
-      arrFilter = arrTodo.filter(item => item.done == false);
-    }
-    if (e.target.id === "option3") {
-      arrFilter = arrTodo.filter(item => item.done == true);
-    }
+    render();
+  }
 
-    console.log(arrFilter);
+  // clear complete
+  function clearAllTodo() {
+    todos = todos.filter((item) => item.done === false);
+
+    render();
+  }
+
+  // edit todo
+  function editTodo(e, id) {
+    let elem = e.target.firstElementChild;
+    let index = todos.findIndex((curr) => curr.id === id);
+
+    elem.classList.remove("invisible");
+    elem.focus();
+    elem.value = todos[index].value;
+  }
+
+  // save todo
+  function saveTodo(e, id) {
+    let index = todos.findIndex((curr) => curr.id === id);
+    todos[index].value = e.target.value;
+    e.target.classList.add("invisible");
+
+    render();
+  }
+
+  function setFilterActive(elem) {
+    elem.closest(".filters").children(".btn").removeClass("active");
+    elem.closest(".btn").addClass("active");
+  }
+
+  // filter all
+  function filterAll() {
+    setFilterActive($filterAll);
+
+    render();
+  }
+
+  // filter active
+  function filterActive() {
+    setFilterActive($filterActive);
+
+    render();
+  }
+
+  // filter complete
+  function filterComplete() {
+    setFilterActive($filterComplete);
+
+    render();
   }
 
   // "Enter" на поле ввода
-  inTodo.keydown(addCase);
+  $todoText.keydown(addTodo);
 
   // click "Check all"
-  rbCheckAll.click(checkCase);
+  $checkAll.click(checkAllTodo);
 
   // click "Clear complete"
-  outClearComplete.click(deleteCase);
+  $clearComplete.click(clearAllTodo);
 
   // click filter
-  outFilters.click(filterCases);
+  $filterAll.click(filterAll);
+  $filterActive.click(filterActive);
+  $filterComplete.click(filterComplete);
 
-  // click list
-  outList.click(e => {
-    // click check case
-    if (e.target.id.startsWith("out-check-")) {
-      checkCase(e);
+  // click list --> delegation events
+  $todoList.click((e) => {
+    let id = +e.target.closest(".todo-item").dataset.tid;
+
+    // click check todo
+    if (e.target.classList.contains("todo-check")) {
+      checkTodo(id);
     }
-    // click delete case
-    if (e.target.id.startsWith("span-")) {
-      deleteCase(e);
+
+    // click delete todo
+    if (e.target.classList.contains("btn-delete-todo")) {
+      deleteTodo(id);
     }
+  });
+
+  // dblclick, edit todo
+  $(document).on("dblclick", ".todo-list-item", function (e) {
+    editTodo(e, +e.target.closest(".todo-item").dataset.tid);
+  });
+
+  // keydown "enter" on edit input
+  $(document).on("keydown", ".todo-edit", function (e) {
+    if (e.keyCode === 13) {
+      saveTodo(e, +e.target.closest(".todo-item").dataset.tid);
+    }
+  });
+
+  // blur on edit input
+  $(document).on("blur", ".todo-edit", function (e) {
+    saveTodo(e, +e.target.closest(".todo-item").dataset.tid);
+  });
+
+  // click on tuning button
+  $tuning.click(() => {
+    $tuning.toggleClass("tuning-up");
+    $tuningPanel.slideToggle("fast");
+  });
+
+  // check value tuning-page input
+  $tuningPage.change(function () {
+    if (this.value.length > 2) {
+      this.value = this.value.slice(0, 2);
+    }
+    if (this.value < 0) {
+      this.value = 3;
+    }
+
+    render();
+  });
+
+  // click on pagination
+  $pagination.click((e) => {
+    $pagination.children(".page-item").removeClass("active");
+    e.target.closest(".page-item").classList.add("active");
+
+    render();
   });
 });

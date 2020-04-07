@@ -7,8 +7,9 @@ body {
   margin: 20px auto;
 }
 
-.in-group {
-  width: 0;
+ul {
+  padding: 0;
+  list-style: none;
 }
 
 .text-muted {
@@ -19,11 +20,87 @@ body {
   display: none;
 }
 
-.out-item:hover .close {
+.todo-item:hover .close {
   display: block;
 }
 
-.out-item-stroke {
+.strike {
   text-decoration: line-through;
   color: gray;
+}
+
+.todo-item {
+  margin-bottom: 2px;
+}
+
+.todo-list-item {
+  position: relative;
+}
+
+.todo-edit {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  width: 510px;
+  padding: 5px;
+  box-sizing: border-box;
+
+  line-height: 36px;
+}
+
+.tuning {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  z-index: 5;
+  width: 15px;
+  height: 15px;
+
+  background: url("img/arrow-down.svg") no-repeat center center;
+  border: none;
+  opacity: 0.3;
+  outline: none;
+}
+
+.tuning-up {
+  background: url("img/arrow-up.svg") no-repeat center center;
+}
+
+.tuning:hover,
+.tuning:focus {
+  opacity: 0.6;
+}
+
+.tuning:active {
+  opacity: 1;
+}
+
+.tuning-panel {
+  display: none;
+  padding: 5px;
+
+  border: 1px solid #ced4da;
+}
+
+.tuning-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tuning-label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0;
+}
+
+.tuning-label span {
+  margin-right: 10px;
+}
+
+.tuning-page input {
+  width: 50px;
 }
