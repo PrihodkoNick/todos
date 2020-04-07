@@ -49,13 +49,6 @@ $(document).ready(function () {
     counter++;
   }
 
-  // function setActivePage() {
-  //   if ($pagination.children().length > 0) {
-  //     $pagination.children(".page-item").removeClass("active");
-  //     $pagination.children(".page-item:last-child").addClass("active");
-  //   }
-  // }
-
   function renderHeader() {
     if (todos.length) {
       let arrLeft = todos.filter((item) => item.done === false);
@@ -71,11 +64,8 @@ $(document).ready(function () {
 
   function getPageTodos() {
     let numberPage = $pagination.children(".page-item.active").data("pageId"); // find number of active page
-
     let start = +$tuningPage.val() * (numberPage - 1);
-
     let end = start + +$tuningPage.val();
-
     return todos.slice(start, end);
   }
 
@@ -162,7 +152,6 @@ $(document).ready(function () {
     $pagination.empty();
     if (todos.length > $tuningPage.val()) {
       let count = Math.ceil(todos.length / $tuningPage.val());
-      // numberPage === undefined ? (numberPage = count) : "";
       for (let i = 0; i < count; i++) {
         $pagination.append(`<li class="page-item ${
           i === numberPage - 1 ? "active" : ""
@@ -243,7 +232,6 @@ $(document).ready(function () {
   // filter active
   function filterActive() {
     setFilterActive($filterActive);
-    // todos = todos.filter(item => item.done === false);
 
     render();
   }
@@ -251,7 +239,6 @@ $(document).ready(function () {
   // filter complete
   function filterComplete() {
     setFilterActive($filterComplete);
-    // todos = todos.filter(item => item.done === true);
 
     render();
   }
