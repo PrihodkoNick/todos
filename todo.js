@@ -49,9 +49,9 @@ $(document).ready(function () {
     counter++;
   }
 
-  function renderHeader() {
-    if (todos.length) {
-      let arrLeft = todos.filter((item) => item.done === false);
+  function renderHeader(todosFilter) {
+    if (todosFilter.length) {
+      let arrLeft = todosFilter.filter((item) => item.done === false);
       arrLeft.length
         ? ($checkAll[0].checked = false)
         : ($checkAll[0].checked = true);
@@ -87,7 +87,7 @@ $(document).ready(function () {
 
     todosFilter = filterTodo(todosFilter);
 
-    renderHeader();
+    renderHeader(todosFilter);
 
     let checked;
     let strike;
