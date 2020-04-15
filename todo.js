@@ -128,8 +128,8 @@ $(document).ready(function () {
   }
 
   function renderFooter() {
-    let arrLeftLength = todos.filter((item) => item.done == false).length;
-    let arrDoneLength = todos.length - arrLeftLength;
+    let activeCount = todos.filter((item) => item.done == false).length;
+    let doneCount = todos.length - activeCount;
 
     // show footer
     todos.length
@@ -137,10 +137,10 @@ $(document).ready(function () {
       : $footer.addClass("invisible");
 
     // create "items left"
-    $(".items-left").text(`${arrLeftLength} items left`);
+    $(".items-left").text(`${activeCount} items left`);
 
-    // show "Clear complete"
-    arrDoneLength
+    // show "Clear complete" +++
+    doneCount
       ? $clearComplete.removeClass("invisible")
       : $clearComplete.addClass("invisible");
   }
