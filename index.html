@@ -2,7 +2,9 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="reset.css" />
     <link rel="stylesheet" href="style.css" />
     <link
       rel="stylesheet"
@@ -13,46 +15,43 @@
     <title>Todo</title>
   </head>
   <body>
-    <div class="wrapper">
-      <h1 class="display-1 text-center text-info">Todos</h1>
-      <div class="input-group mb-2">
-        <div class="input-group-prepend invisible">
+    <section class="wrapper">
+      <header class="d-flex justify-content-between align-items-baseline">
+        <h1 class="flex-grow-1 display-1 text-center text-info">Todos</h1>
+        <label class="mr-1">Todos on page:</label>
+        <div>
+          <select class="todos-on-page form-control">
+            <option>3</option>
+            <option>5</option>
+            <option>7</option>
+            <option>10</option>
+          </select>
+        </div>
+      </header>
+
+      <div class="add-todo input-group mb-2">
+        <div class="check-all-box input-group-prepend invisible">
           <div class="input-group-text">
             <input class="check-all" type="checkbox" />
           </div>
         </div>
         <input
           type="text"
-          class="todo-text form-control"
+          class="todo-text form-control rounded"
           placeholder="What needs to be done?"
-          aria-label="Text input with checkbox"
-          aria-describedby="button-addon2"
           maxlength="50"
         />
-        <button type="button" class="tuning"></button>
-      </div>
-
-      <div class="tuning-panel mb-2">
-        <div class="tuning-box">
-          <label class="tuning-label"
-            ><span>Search:</span><input type="text"
-          /></label>
-          <label class="tuning-label tuning-page"
-            ><span>Todos on page:</span>
-            <input type="number" min="3" max="99" value="3" />
-          </label>
-        </div>
       </div>
 
       <ul class="todo-list list-group mb-2"></ul>
       <nav class="d-flex justify-content-center">
-        <ul class="pagination"></ul>
+        <ul class="pagination mb-2"></ul>
       </nav>
 
       <div
-        class="footer d-flex justify-content-between align-items-center border rounded p-1 bg-light invisible"
+        class="footer d-flex justify-content-between align-items-center border rounded bg-light p-1 invisible"
       >
-        <p class="items-left text-muted">0 items left</p>
+        <p class="items-left text-muted mb-0">0 items left</p>
         <div
           class="filters btn-group btn-group-toggle btn-group-sm"
           data-toggle="buttons"
@@ -74,10 +73,9 @@
           >Clear completed</a
         >
       </div>
-    </div>
+    </section>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-
     <script src="todo.js"></script>
   </body>
 </html>
