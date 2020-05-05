@@ -1,11 +1,8 @@
-// checkAll[0].prop("checked", "checked");
-
 $(document).ready(function () {
   const $checkAll = $(".check-all");
   const $todoText = $(".todo-text");
   const $todoList = $(".todo-list");
   const $footer = $(".footer");
-  // const $itemsLeft = $(".items-left");
   const $clearComplete = $(".clear-complete");
   const $filterAll = $("#all");
   const $filterActive = $("#active");
@@ -128,7 +125,7 @@ $(document).ready(function () {
   }
 
   function renderFooter() {
-    let activeCount = todos.filter((item) => item.done == false).length;
+    let activeCount = todos.filter((item) => !item.done).length;
     let doneCount = todos.length - activeCount;
 
     // show footer
@@ -170,7 +167,6 @@ $(document).ready(function () {
 
   // check/uncheck all todos
   function checkAllTodo() {
-    console.log("$checkAll[0].checked:", $checkAll[0].checked);
     for (key of todos) {
       key.done = $checkAll[0].checked;
     }
@@ -278,8 +274,9 @@ $(document).ready(function () {
     saveTodo(e, +e.target.closest(".todo-item").dataset.tid);
   });
 
+  // change quantity todos on page
   $todosOnPage.change(() => {
-    render();
+    render(true); // goto last page
   });
 
   // click on pagination
